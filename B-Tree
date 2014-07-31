@@ -1,0 +1,136 @@
+#include<stdio.h>
+#include<conio.h>
+#include<iostream>
+using namespace std;
+struct BTreeNode
+{
+       int *keys;
+       BTreeNode **child_ptr;
+       bool leaf;
+       int n;
+}*root=NULL,*x=NULL,*y=NULL,*x1=NULL,*np=NULL;
+BTreeNode *new_node()
+{
+    int i;
+    np=new BTreeNode;
+    np->child_ptr=new BTreeNode *[6];
+    np->n=0;
+    np->leaf=true;
+    np->keys=new int[5];
+    for(i=0;i<6;i++)
+        np->child_ptr[i]=NULL;
+    return np;
+}
+BTreeNode *split_child(BTreeNode *x,BTreeNode * y,int a)
+{
+     int i,mid;
+     x1 = new_node();
+     mid=y->keys[(y->n)/2];
+     for(i=3;i<5;i++)
+     {
+         x1->keys[i-3]=y->keys[i];
+         y->keys[i]=0;
+         y->child_ptr[i]=NULL;
+         x1->child_ptr[i-3]=NULL;
+         y->n--;
+         x1->n++;
+     }
+     if(x == NULL)
+     {
+          x=new_node();
+          root=x;
+     }
+     x->keys[x->n]=mid;
+     y->keys[y->n-1]=0;
+     y->n--;
+     x->child_ptr[x->n]=y;
+     x->child_ptr[x->n+1]=x1;
+     x->leaf=false;
+     x->n++;
+     if(a>mid)
+         return x1;
+     else
+         return y;
+}
+void traverse(BTreeNode *p)
+{
+    cout<<endl;
+    int i;
+    for (i = 0; i < p->n; i++)
+    {
+        if (p->leaf == false)
+		{
+			traverse(p->child_ptr[i]);
+		}
+        cout << " " << p->keys[i];
+    } 
+	if (p->leaf == false)
+    {
+		traverse(p->child_ptr[i]);
+	}
+	cout<<endl;
+}
+void create(int k)
+{
+     int i,j,temp;
+     if(root==NULL)
+     {
+         root=new_node();
+         x=root;
+     }
+     else
+     {
+         x=root;
+         if(x->n == 5 && x->leaf==true)
+         {
+             x=split_child(NULL,x,k);
+             //cout<<x->n<<endl;
+         }
+         while(!(x->leaf))
+         {
+             for(i=0;i<5;i++)
+             {
+                 if(k<x->keys[i])
+                     break;
+                 else
+                     continue;
+             }
+             temp=i;
+             y=x->child_ptr[temp];
+             if(y->n==5)
+                 x=split_child(x,y,k);
+             else
+                 x=y;
+         }
+     } 
+     x->keys[x->n]=k;
+     x->n=x->n+1;
+     for(i=0;i<(x->n)-1;i++)
+     {
+         for(j=0;j<(x->n)-i-1;j++)
+         {
+             if(x->keys[j]>x->keys[j+1])
+             {
+                 temp=x->keys[j];
+                 x->keys[j]=x->keys[j+1];
+                 x->keys[j+1]=temp;
+             }
+         }
+     }
+}
+int main()
+{
+    int x,n,i=0;
+    cout<<"enter the no of values\n";
+    cin>>n;
+    while(i<n)
+    {
+        cout<<"enter value\n";
+        cin>>x;
+        create(x);
+        //traverse(root);
+        i++;
+    }
+    traverse(root);
+    getch();
+}
